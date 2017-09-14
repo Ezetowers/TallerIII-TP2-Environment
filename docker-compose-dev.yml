@@ -9,17 +9,18 @@ services:
     environment:
       - ZOOKEEPER_LOGLEVEL=DEBUG
 
-  kafka:
+  kafka1:
     build:
       context: ./kafka
       dockerfile: kafka.dockerfile
     ports:
-      - "9092:9092"
+      - "19092:9092"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro
     environment:
-      - KAFKA_ADVERTISED_HOST=kafka
+      - KAFKA_BROKER_ID=0
+      - KAFKA_ADVERTISED_HOST=kafka1
       - KAFKA_ADVERTISED_PORT=9092
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_DELETE_TOPIC_ENABLE=true
@@ -28,27 +29,54 @@ services:
       - KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS=1000
       - KAFKA_JMX_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=kafka -Dcom.sun.management.jmxremote.rmi.port=1099
       - JMX_PORT=1099
-
-  kafka-manager:
-    image: sheepkiller/kafka-manager:latest
-    ports:
-      - "9000:9000"
     depends_on:
       - zookeeper
-      - kafka
+
+  kafka2:
+    build:
+      context: ./kafka
+      dockerfile: kafka.dockerfile
+    ports:
+      - "19093:9092"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+      - ./kafka/config/create_topics.sh:/tmp/create_topics.sh
     environment:
-      ZK_HOSTS: zookeeper:2181
-      APPLICATION_SECRET: letmein
-      KM_ARGS: -Djava.net.preferIPv4Stack=true
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ADVERTISED_HOST=kafka2
+      - KAFKA_ADVERTISED_PORT=9092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_DELETE_TOPIC_ENABLE=true
+      - KAFKA_LOG_RETENTION_HOURS=1
+      - KAFKA_NUM_PARTITIONS=2
+      - KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS=1000
+      - KAFKA_JMX_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=kafka -Dcom.sun.management.jmxremote.rmi.port=1099
+      - JMX_PORT=1099
+    depends_on:
+      - zookeeper
+
+  # kafka-manager:
+  #   image: sheepkiller/kafka-manager:latest
+  #   ports:
+  #     - "9000:9000"
+  #   depends_on:
+  #     - zookeeper
+  #     - kafka
+  #   environment:
+  #     ZK_HOSTS: zookeeper:2181
+  #     APPLICATION_SECRET: letmein
+  #     KM_ARGS: -Djava.net.preferIPv4Stack=true
 
   producer:
     build:
       context: ./producer
       dockerfile: producer.dockerfile
     depends_on:
-      - kafka
+      - kafka1
+      - kafka2
     environment:
-      - KAFKA_HOST=kafka
+      - KAFKA_HOST=kafka1
       - KAFKA_PORT=9092
 
   consumer:
@@ -57,6 +85,8 @@ services:
       dockerfile: consumer.dockerfile
     depends_on:
       - producer
+      - kafka1
+      - kafka2
     environment:
-      - KAFKA_HOST=kafka
+      - KAFKA_HOST=kafka1
       - KAFKA_PORT=9092

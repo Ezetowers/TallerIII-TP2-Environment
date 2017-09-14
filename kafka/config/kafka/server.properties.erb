@@ -18,7 +18,7 @@
 ############################# Server Basics #############################
 
 # The id of the broker. This must be set to a unique integer for each broker.
-broker.id=0
+broker.id=@KAFKA_BROKER_ID@
 
 # Switch to enable topic deletion or not, default value is false
 #delete.topic.enable=@KAFKA_DELETE_TOPIC_ENABLE@
@@ -120,3 +120,5 @@ zookeeper.connect=@KAFKA_ZOOKEEPER_CONNECT@
 
 # Timeout in ms for connecting to zookeeper
 zookeeper.connection.timeout.ms=6000
+
+auto.create.topics.enable=false

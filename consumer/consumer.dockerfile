@@ -2,16 +2,9 @@ FROM alpine:3.5
 
 WORKDIR /tmp
 
-RUN apk --update add supervisor bash python3 vim && \
+RUN apk --update add supervisor bash python3 vim openjdk8-jre openjdk8 maven && \
     pip3 install --upgrade pip && \
     pip3 install kafka-python
-
-# Download, install and configure zookeeper
-# ADD config/zookeeper /tmp/zookeeper/
-# RUN wget http://apache.dattatec.com/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz && \
-#     mkdir /opt && tar xzvf zookeeper-3.4.10.tar.gz -C /opt/ && \
-#     cp zookeeper/zoo.cfg /opt/zookeeper-3.4.10/conf && \
-#     rm -rf zookeeper-3.4.10.tar.gz
 
 # Configure supervisor to start zookeeper
 ADD config/supervisor /tmp/supervisor
@@ -21,5 +14,7 @@ RUN mkdir -p /etc/supervisor/conf.d && \
 
 ADD config/consumer/consumer.py /root/
 ADD config/init.sh /root/
+
+ADD config/consumer/java /root/java
 
 CMD /root/init.sh
