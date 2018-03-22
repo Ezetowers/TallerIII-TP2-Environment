@@ -11,8 +11,8 @@ supervisord -c /etc/supervisor/supervisord.conf
 touch /root/consumer.log
 
 # Java program
-. ~/.bashrc
-cd /root/java 
-mvn clean package
-java -cp target/CustomKafkaConsumer-1.0.0.jar:/root/.m2/repository/org/apache/kafka/kafka-clients/0.10.0.0/kafka-clients-0.10.0.0.jar:/root/.m2/repository/org/slf4j/slf4j-api/1.7.21/slf4j-api-1.7.21.jar test.CustomKafkaConsumer kafka2-topic lala
+# . ~/.bashrc
+# cd /root/java 
+# mvn clean package
+# java -cp target/CustomKafkaConsumer-1.0.0.jar:/root/.m2/repository/org/apache/kafka/kafka-clients/0.10.0.0/kafka-clients-0.10.0.0.jar:/root/.m2/repository/org/slf4j/slf4j-api/1.7.21/slf4j-api-1.7.21.jar test.CustomKafkaConsumer kafka2-topic lala
 tail -f /root/consumer.log
